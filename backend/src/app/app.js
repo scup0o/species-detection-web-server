@@ -24,11 +24,11 @@ app.get('/ping', (req, res) => {
     res.status(200).json({ message: 'pong' });
 });
 
-// API Routes (đã có /api/v1 prefix từ đây)
+/*// API Routes (đã có /api/v1 prefix từ đây)
 app.use('/api/v1', (req, res) => {
     console.log('GET / api/v1 received');
     res.status(200).json({ message: 'api/v1 received!' });
-});
+});*/
 
 // Health check route (có thể để ở đây hoặc trong apiV1Routes nếu muốn có prefix /api/v1)
 // Nếu để ở đây, nó sẽ là your-app.vercel.app/health
