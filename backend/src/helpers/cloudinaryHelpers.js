@@ -1,0 +1,21 @@
+const BASE_URL = "https://res.cloudinary.com/degflo4pi/image/upload/"
+const VERSION = "v1746955323/"
+
+const TRANSFORMATION_SQUARE = "ar_1:1,c_fill,g_auto/"
+const TRANSFORMATION_THUMBNAIL = "w_80,ar_1:1,c_fill,g_auto/"
+
+function getBaseImageURL(originalURL){
+        return BASE_URL+VERSION+originalURL
+    }
+
+function getSquareImageURL(originalURL) {
+    if (!originalURL) return null;
+
+    return BASE_URL+TRANSFORMATION_SQUARE+VERSION+originalURL
+}
+
+function getThumbnailImageURL(originalURL){
+    return BASE_URL+TRANSFORMATION_THUMBNAIL+VERSION+originalURL
+}
+
+module.exports = { getSquareImageURL, getBaseImageURL, getThumbnailImageURL };
