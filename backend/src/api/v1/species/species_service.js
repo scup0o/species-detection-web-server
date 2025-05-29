@@ -111,11 +111,12 @@ const getSpeciesList = async (options) => {
                     admin.firestore.Filter.where(`nameTokens.${languageCode}`, 'array-contains-any', tokensForFirestore),
                     admin.firestore.Filter.where('scientificNameToken', 'array-contains-any', tokensForFirestore)
                 ));
+                
             }
         }
         // >>>>> KẾT THÚC PHẦN SỬA <<<<<
-
-        firestoreQuery = firestoreQuery.orderBy(admin.firestore.FieldPath.documentId());
+        firestoreQuery = firestoreQuery.orderBy(`name.${languageCode}`,'asc')
+        //firestoreQuery = firestoreQuery.orderBy(admin.firestore.FieldPath.documentId());
 
         if (currentFirestoreCursorDocSnapshot) {
             firestoreQuery = firestoreQuery.startAfter(currentFirestoreCursorDocSnapshot);
