@@ -1,6 +1,12 @@
 const app = require('./app'); // Giả sử app.js nằm cùng cấp hoặc đường dẫn đúng
 const config = require('../config/index'); // Đường dẫn đến file config của bạn
 
+app.get('/vercel-test-route', (req, res) => {
+    console.log('[VERCEL DEBUG] /vercel-test-route hit!');
+    res.status(200).json({ message: 'Hello directly from server.js on Vercel!' });
+});
+console.log('[VERCEL DEBUG] /vercel-test-route defined in server.js');
+
 async function startLocalServer() {
     try {
         const PORT = config.app.port || process.env.PORT || 3000; // Ưu tiên config, rồi PORT từ env, rồi 3000
