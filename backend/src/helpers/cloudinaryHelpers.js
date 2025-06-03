@@ -19,7 +19,7 @@ function getThumbnailImageURL(originalURL){
     return BASE_URL+TRANSFORMATION_THUMBNAIL+VERSION+originalURL
 }
 
-function getTransformationBaseImageURL(originalImageUrls){
+function getTransformationBaseImageURL(originalURL){
     return BASE_URL+TRANSFORMATION_BASE+VERSION+originalURL
 }
 
