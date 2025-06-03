@@ -1,5 +1,5 @@
 const { db, admin } = require('../../../config/firebaseAdmin');
-const { getSquareImageURL, getThumbnailImageURL } = require('../../../helpers/cloudinaryHelpers');
+const { getSquareImageURL, getThumbnailImageURL, getBaseImageURL } = require('../../../helpers/cloudinaryHelpers');
 const firestoreService = require('../../firestore.service');
 
 const SPECIES_COLLECTION = 'species';
