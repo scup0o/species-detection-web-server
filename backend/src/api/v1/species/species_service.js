@@ -126,7 +126,7 @@ const getSpeciesList = async (options) => {
         totalFirestoreFetchesMade++;
         console.log(`[SVC_GET_LIST] Firestore Fetch #${totalFirestoreFetchesMade} (Retry ${fetchAttempt}): Fetching up to ${itemsToFetchInThisBatch} items, starting after '${currentFirestoreCursorDocSnapshot?.id || 'beginning'}'.`);
 
-        const snapshot = await firestoreQuery.limit(itemsToFetchInThisBatch).get();
+        const snapshot = await firestoreQuery.select("classId", "family", "imageURL", "name", "scientificName").limit(itemsToFetchInThisBatch).get();
         const fetchedDocsInThisBatch = snapshot.docs;
         console.log(`[SVC_GET_LIST] Firestore Fetch #${totalFirestoreFetchesMade}: Fetched ${fetchedDocsInThisBatch.length} raw documents.`);
 
@@ -230,7 +230,10 @@ const getSpeciesList = async (options) => {
 
 const getSpeciesByIdsList = async (idList, languageCode) => {
     if (!idList || idList.length === 0) return { items: [], pagination: { totalItems: 0, currentPage: 1, pageSize: 0, totalPages: 0, lastVisibleDocId: null, hasNextPage: false } };
-    const rawSpeciesList = await firestoreService.getDocumentsByIds(SPECIES_COLLECTION, idList);
+    const fieldsToFetch = ["classId, family, imageURL, name, scientificName"];
+
+    
+    const rawSpeciesList = await firestoreService.getDocumentsByIds(SPECIES_COLLECTION, idList, fieldsToFetch);
     if (rawSpeciesList.length === 0) return { items: [], pagination: { totalItems: 0, currentPage: 1, pageSize: idList.length, totalPages: 0, lastVisibleDocId: null, hasNextPage: false } };
 
     const displayableItems = await Promise.all(
