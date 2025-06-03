@@ -42,13 +42,12 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
     const originalImageUrls = speciesData.imageURL || []; 
     let processedImageURLs = [];
 
-    if (originalImageUrls.length > 0) {
-        processedImageURLs.push(getThumbnailImageURL(originalImageUrls[0]));
-
-        for (let i = 1; i < originalImageUrls.length; i++) {
-            processedImageURLs.push(getSquareImageURL(originalImageUrls[i]));
+ 
+        for (let i = 0; i < originalImageUrls.length; i++) {
+            processedImageURLs.push(getBaseImageURL(originalImageUrls[i]));
         }
-    }
+    
+    let thumbnailImageURL= getThumbnailImageURL(originalImageUrls[0])
 
     return {
         id: speciesId,
@@ -60,6 +59,7 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
             class: scientificClass,
         },
         localizedFamily,
+        thumbnailImageURL,
         imageURL: processedImageURLs.length > 0 ? processedImageURLs : null,
     };
 };
