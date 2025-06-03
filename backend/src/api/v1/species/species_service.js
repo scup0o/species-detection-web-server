@@ -1,5 +1,5 @@
 const { db, admin } = require('../../../config/firebaseAdmin');
-const { getSquareImageURL, getThumbnailImageURL, getBaseImageURL } = require('../../../helpers/cloudinaryHelpers');
+const { getSquareImageURL, getThumbnailImageURL, getBaseImageURL, getTransformationBaseImageURL } = require('../../../helpers/cloudinaryHelpers');
 const firestoreService = require('../../firestore.service');
 
 const SPECIES_COLLECTION = 'species';
@@ -44,7 +44,7 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
 
  
         for (let i = 0; i < originalImageUrls.length; i++) {
-            processedImageURLs.push(getBaseImageURL(originalImageUrls[i]));
+            processedImageURLs.push(getTransformationBaseImageURL(originalImageUrls[i]));
         }
     
     let thumbnailImageURL= getThumbnailImageURL(originalImageUrls[0])
