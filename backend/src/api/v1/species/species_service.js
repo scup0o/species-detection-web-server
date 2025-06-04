@@ -128,7 +128,7 @@ const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageC
 
     // Áp dụng hàm helper để đảm bảo kết quả là mảng
     const localizedSummary = ensureArray(rawSummary);
-    const localizedPhysicalDescription = ensureArray(rawPhysicalDescription);
+    const localizedPhysical = ensureArray(rawPhysicalDescription);
     const localizedHabitat = ensureArray(rawHabitat);
     const localizedDistribution = ensureArray(rawDistribution);
     const localizedBehavior = ensureArray(rawBehavior);
@@ -150,7 +150,7 @@ const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageC
 
         // Các trường mô tả chi tiết, trả về null nếu không có bản dịch phù hợp
         localizedSummary,
-        localizedPhysicalDescription,
+        localizedPhysical,
         localizedHabitat,
         localizedDistribution,
         localizedBehavior
