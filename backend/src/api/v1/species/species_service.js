@@ -1,3 +1,4 @@
+const { raw } = require('express');
 const { db, admin } = require('../../../config/firebaseAdmin');
 const { getSquareImageURL, getThumbnailImageURL, getBaseImageURL, getTransformationBaseImageURL } = require('../../../helpers/cloudinaryHelpers');
 const firestoreService = require('../../firestore.service');
@@ -61,6 +62,81 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
         localizedFamily,
         thumbnailImageURL,
         imageURL: processedImageURLs.length > 0 ? processedImageURLs : null,
+    };
+};
+
+const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageCode) => {
+    // Luôn kiểm tra speciesRawData trước tiên
+    if (!speciesRawData) {
+        console.warn(`[toDisplayableSpeciesDetailed] speciesRawData is undefined for ID: ${speciesId}`);
+        // Trả về một cấu trúc mặc định hoặc null/undefined tùy theo yêu cầu của bạn
+        // Ở đây, tôi sẽ trả về null để báo hiệu không thể xử lý
+        return null;
+    }
+    console.log(`[DEBUG toDisplayableSpeciesDetailed] Received languageCode: '${languageCode}' for speciesId: ${speciesId}`);
+
+    const internalClassMap = await getSpeciesClassMapInternal();
+    const speciesData = speciesRawData; // speciesData giờ chắc chắn không undefined
+
+    // Lấy classNameMapForSpecies, đảm bảo speciesData.classId tồn tại
+    const classNameMapForSpecies = speciesData.classId ? (internalClassMap[speciesData.classId] || {}) : {};
+
+    // Sử dụng optional chaining (?.) và nullish coalescing (??) để xử lý undefined/null
+    const localizedName = speciesData.name?.[languageCode] ?? speciesData.name?.['en'] ?? "N/A";
+    const localizedFamily = speciesData.family?.[languageCode] ?? speciesData.family?.['en'] ?? "N/A";
+    const scientificFamily = speciesData.family?.scientific ?? "N/A";
+
+    const localizedClassName = classNameMapForSpecies[languageCode] ?? classNameMapForSpecies['en'] ?? speciesData.classId ?? "N/A";
+
+    // Xử lý scientificClass cẩn thận hơn
+    let scientificClass = "N/A";
+    if (speciesData.classId && typeof speciesData.classId === 'string' && speciesData.classId.length > 0) {
+        scientificClass = speciesData.classId.charAt(0).toUpperCase() + speciesData.classId.slice(1).toLowerCase();
+    }
+
+    const originalImageUrls = speciesData.imageURL || []; // Đảm bảo originalImageUrls là mảng
+    let processedImageURLs = [];
+    if (Array.isArray(originalImageUrls)) {
+        for (let i = 0; i < originalImageUrls.length; i++) {
+            if (originalImageUrls[i]) { // Kiểm tra url có tồn tại không
+                processedImageURLs.push(getTransformationBaseImageURL(originalImageUrls[i]));
+            }
+        }
+    }
+
+    let thumbnailImageURL = null; // Mặc định là null
+    if (originalImageUrls.length > 0 && originalImageUrls[0]) {
+        thumbnailImageURL = getThumbnailImageURL(originalImageUrls[0]);
+    }
+
+    // Kiểm tra các trường text có thể là object theo ngôn ngữ
+    const localizedSummary = speciesData.summary?.[languageCode] ?? speciesData.summary?.['en'] ?? null;
+    const localizedPhysicalDescription = speciesData.physicalDescription?.[languageCode] ?? speciesData.physicalDescription?.['en'] ?? null;
+    const localizedHabitat = speciesData.habitat?.[languageCode] ?? speciesData.habitat?.['en'] ?? null;
+    const localizedDistribution = speciesData.distribution?.[languageCode] ?? speciesData.distribution?.['en'] ?? null;
+    const localizedBehavior = speciesData.behavior?.[languageCode] ?? speciesData.behavior?.['en'] ?? null;
+
+    return {
+        id: speciesId,
+        localizedName,
+        localizedClass: localizedClassName,
+        scientific: {
+            name: speciesData.scientificName ?? "N/A",
+            family: scientificFamily,
+            class: scientificClass, // scientificClass đã được xử lý
+        },
+        localizedFamily,
+        thumbnailImageURL, // Có thể là null
+        imageURL: processedImageURLs.length > 0 ? processedImageURLs : null, // Trả về null nếu không có ảnh đã xử lý
+        info: speciesData.info ?? null, // Giả sử info có thể không tồn tại
+        conservation: speciesData.conservation ?? null, // Giả sử conservation có thể không tồn tại
+
+        // Các trường mô tả chi tiết, trả về null nếu không có bản dịch phù hợp
+        localizedSummary,
+        localizedPhysicalDescription,
+        localizedHabitat,
+        localizedDistribution,
+        localizedBehavior
     };
 };
 
@@ -257,18 +333,31 @@ const getSpeciesClassesList = async () => {
     }
 };
 
-const getSpeciesByIdDetailed = async (id, languageCode) =>{
-    const rawSpeciesList = await firestoreService.getDocumentsByIds(SPECIES_COLLECTION, id);
-    if (rawSpeciesList.length === 0) return { items: [], pagination: { totalItems: 0, currentPage: 1, pageSize: idList.length, totalPages: 0, lastVisibleDocId: null, hasNextPage: false } };
+const getSpeciesByDocumentId = async (speciesId, languageCode) => {
+    if (!speciesId) {
+        console.warn("getSpeciesByDocumentId: speciesId is required.");
+        return null;
+    }
 
-    const displayableItems = await Promise.all(
-        rawSpeciesList.map(sRaw => toDisplayableSpecies(sRaw, sRaw.id, languageCode)) // sRaw is {id, ...data}
-    );
+    try {
+        const speciesDoc = await firestoreService.getDocumentById(SPECIES_COLLECTION, speciesId);
 
-    return {
-        items: displayableItems,
-        pagination: { totalItems: displayableItems.length, currentPage: 1, pageSize: displayableItems.length, totalPages: 1, lastVisibleDocId: displayableItems.length > 0 ? displayableItems[displayableItems.length - 1].id : null, hasNextPage: false }
-    };
-}
+        if (speciesDoc) {
+            // speciesDoc đã bao gồm { id: doc.id, ...data } từ firestoreService.getDocumentById
+            // Giờ chúng ta cần map nó sang DisplayableSpecies
+            // Hàm toDisplayableSpecies đã được cập nhật để nhận (speciesData, speciesId, languageCode)
+            // speciesData ở đây là speciesDoc (không bao gồm id nữa vì đã truyền riêng speciesId)
+            const { id, ...speciesDataOnly } = speciesDoc; // Tách id ra khỏi data
+            console.log(speciesDoc)
+            return await toDisplayableSpeciesDetailed(speciesDataOnly, speciesId, languageCode);
+        } else {
+            console.log(`getSpeciesByDocumentId: No species found with ID: ${speciesId}`);
+            return null;
+        }
+    } catch (error) {
+        console.error(`Error fetching species by document ID ${speciesId}:`, error);
+        throw error; // Hoặc trả về null tùy theo cách bạn muốn xử lý lỗi ở controller
+    }
+};
 
-module.exports = { getSpeciesList, getSpeciesByIdsList, getSpeciesClassesList, getSpeciesByIdDetailed };
+module.exports = { getSpeciesList, getSpeciesByIdsList, getSpeciesClassesList, getSpeciesByDocumentId };

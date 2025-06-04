@@ -30,6 +30,8 @@ const getSpeciesClassesSchema = Joi.object({
 });
 
 
+
+
 const validate = (schema, source = 'query') => (req, res, next) => {
     const dataToValidate = source === 'body' ? req.body : req.query;
     const { error: validationError, value: validatedValue } = schema.validate(dataToValidate, {
@@ -50,6 +52,8 @@ const validate = (schema, source = 'query') => (req, res, next) => {
     }
     next();
 };
+
+
 
 module.exports = {
     validateGetSpecies: validate(getSpeciesSchema, 'query'),

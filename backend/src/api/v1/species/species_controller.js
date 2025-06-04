@@ -23,14 +23,21 @@ const getSpeciesByIds = async (req, res, next) => {
     }
 };
 
-const getSpeciesByIdDetailed = async (req, res, next) => {
+const getSingleSpecies = async (req, res, next) => {
     try {
-        const { id, languageCode } = req.query; // Đã được validate
+        const { speciesId } = req.params; // Lấy speciesId từ URL params (ví dụ: /api/v1/species/:speciesId)
+        const { languageCode } = req.query; // Lấy languageCode từ query params
 
-        const result = await speciesService.getSpeciesByIdDetailed(id, languageCode);
-        return pagedSuccess(res, result.items, result.pagination);
+        const species = await speciesService.getSpeciesByDocumentId(speciesId, languageCode);
+
+        if (species) {
+            return success(res, species); // Trả về object species duy nhất
+        } else {
+            // Sử dụng hàm error từ responseHandler để trả về 404
+            return error(res, `Species with ID '${speciesId}' not found.`, 404);
+        }
     } catch (err) {
-        next(err);
+        next(err); // Chuyển lỗi cho global error handler
     }
 };
 
@@ -51,6 +58,6 @@ const getAllSpeciesClasses = async (req, res, next) => {
 module.exports = {
     getAllSpecies,
     getSpeciesByIds,
-    getSpeciesByIdDetailed,
-    getAllSpeciesClasses, // Thêm controller này
+    getAllSpeciesClasses,
+    getSingleSpecies, // <<<< EXPORT CONTROLLER MỚI
 };
