@@ -75,6 +75,14 @@ function ensureArray(value) {
     return []; // Là null, undefined, hoặc chuỗi rỗng, trả về mảng rỗng
 }
 
+function ensureObject(value) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+        // value tồn tại, là kiểu 'object', và không phải là mảng
+        return value;
+    }
+    return {}; // Trả về object rỗng cho các trường hợp khác (null, undefined, primitive, array)
+}
+
 const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageCode) => {
     // Luôn kiểm tra speciesRawData trước tiên
     if (!speciesRawData) {
@@ -145,7 +153,7 @@ const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageC
         localizedFamily,
         thumbnailImageURL, // Có thể là null
         imageURL: processedImageURLs, // Trả về null nếu không có ảnh đã xử lý
-        info: speciesData.info ?? "", // Giả sử info có thể không tồn tại
+        info: ensureObject(speciesData.info), // Giả sử info có thể không tồn tại
         conservation: speciesData.conservation ?? "", // Giả sử conservation có thể không tồn tại
 
         // Các trường mô tả chi tiết, trả về null nếu không có bản dịch phù hợp
