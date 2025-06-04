@@ -41,14 +41,6 @@ app.get('/health', (req, res) => { // <<<< Đã có ở đây, tốt!
 routesLoader(app);
 
 
-/*app.get('*', (req, res, next) => {
-  if (!req.originalUrl.startsWith('/api/') && req.originalUrl.indexOf('.') === -1) {
-    res.sendFile(path.join(__dirname, '../../public/dist/index.html'));
-  } else {
-    next();
-  }
-});*/
-
 app.use(notFoundHandler);
 
 //app.use(globalErrorHandler);

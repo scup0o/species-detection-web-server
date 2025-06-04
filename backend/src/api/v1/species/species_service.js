@@ -257,4 +257,18 @@ const getSpeciesClassesList = async () => {
     }
 };
 
-module.exports = { getSpeciesList, getSpeciesByIdsList, getSpeciesClassesList };
+const getSpeciesByIdDetailed = async (id, languageCode) =>{
+    const rawSpeciesList = await firestoreService.getDocumentsByIds(SPECIES_COLLECTION, id);
+    if (rawSpeciesList.length === 0) return { items: [], pagination: { totalItems: 0, currentPage: 1, pageSize: idList.length, totalPages: 0, lastVisibleDocId: null, hasNextPage: false } };
+
+    const displayableItems = await Promise.all(
+        rawSpeciesList.map(sRaw => toDisplayableSpecies(sRaw, sRaw.id, languageCode)) // sRaw is {id, ...data}
+    );
+
+    return {
+        items: displayableItems,
+        pagination: { totalItems: displayableItems.length, currentPage: 1, pageSize: displayableItems.length, totalPages: 1, lastVisibleDocId: displayableItems.length > 0 ? displayableItems[displayableItems.length - 1].id : null, hasNextPage: false }
+    };
+}
+
+module.exports = { getSpeciesList, getSpeciesByIdsList, getSpeciesClassesList, getSpeciesByIdDetailed };

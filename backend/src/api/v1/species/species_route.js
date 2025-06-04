@@ -11,6 +11,8 @@ const router = express.Router();
 // Route cho Species
 router.get('/', validateGetSpecies, speciesController.getAllSpecies);
 router.get('/by-ids', validateGetSpeciesByIds, speciesController.getSpeciesByIds);
+router.get('/detailed', validateGetSpeciesByIds, speciesController.getSpeciesByIdDetailed);
+
 
 
 module.exports = router;

@@ -23,6 +23,17 @@ const getSpeciesByIds = async (req, res, next) => {
     }
 };
 
+const getSpeciesByIdDetailed = async (req, res, next) => {
+    try {
+        const { id, languageCode } = req.query; // Đã được validate
+
+        const result = await speciesService.getSpeciesByIdDetailed(id, languageCode);
+        return pagedSuccess(res, result.items, result.pagination);
+    } catch (err) {
+        next(err);
+    }
+};
+
 // Controller cho Species Classes
 const getAllSpeciesClasses = async (req, res, next) => {
     try {
@@ -40,5 +51,6 @@ const getAllSpeciesClasses = async (req, res, next) => {
 module.exports = {
     getAllSpecies,
     getSpeciesByIds,
+    getSpeciesByIdDetailed,
     getAllSpeciesClasses, // Thêm controller này
 };

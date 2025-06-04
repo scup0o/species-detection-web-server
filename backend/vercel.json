@@ -22,7 +22,7 @@
     
     {
       "src": "/(.*)",           
-      "dest": "src/server.js"    
+      "dest": "src/app/server.js"    
     }
   ]
 }
