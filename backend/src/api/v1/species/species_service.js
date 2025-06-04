@@ -110,11 +110,11 @@ const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageC
     }
 
     // Kiểm tra các trường text có thể là object theo ngôn ngữ
-    const localizedSummary = speciesData.summary?.[languageCode] ?? speciesData.summary?.['en'] ?? null;
-    const localizedPhysicalDescription = speciesData.physicalDescription?.[languageCode] ?? speciesData.physicalDescription?.['en'] ?? null;
-    const localizedHabitat = speciesData.habitat?.[languageCode] ?? speciesData.habitat?.['en'] ?? null;
-    const localizedDistribution = speciesData.distribution?.[languageCode] ?? speciesData.distribution?.['en'] ?? null;
-    const localizedBehavior = speciesData.behavior?.[languageCode] ?? speciesData.behavior?.['en'] ?? null;
+    const localizedSummary = speciesData.summary?.[languageCode] ?? speciesData.summary?.['en'] ?? "";
+    const localizedPhysicalDescription = speciesData.physicalDescription?.[languageCode] ?? speciesData.physicalDescription?.['en'] ?? "";
+    const localizedHabitat = speciesData.habitat?.[languageCode] ?? speciesData.habitat?.['en'] ?? "";
+    const localizedDistribution = speciesData.distribution?.[languageCode] ?? speciesData.distribution?.['en'] ?? "";
+    const localizedBehavior = speciesData.behavior?.[languageCode] ?? speciesData.behavior?.['en'] ?? "";
 
     return {
         id: speciesId,
