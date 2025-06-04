@@ -92,14 +92,14 @@ const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageC
     const classNameMapForSpecies = speciesData.classId ? (internalClassMap[speciesData.classId] || {}) : {};
 
     // Sử dụng optional chaining (?.) và nullish coalescing (??) để xử lý undefined/null
-    const localizedName = speciesData.name?.[languageCode] ?? speciesData.name?.['en'] ?? "N/A";
-    const localizedFamily = speciesData.family?.[languageCode] ?? speciesData.family?.['en'] ?? "N/A";
-    const scientificFamily = speciesData.family?.scientific ?? "N/A";
+    const localizedName = speciesData.name?.[languageCode] ?? speciesData.name?.['en'] ?? "";
+    const localizedFamily = speciesData.family?.[languageCode] ?? speciesData.family?.['en'] ?? "";
+    const scientificFamily = speciesData.family?.scientific ?? "";
 
-    const localizedClassName = classNameMapForSpecies[languageCode] ?? classNameMapForSpecies['en'] ?? speciesData.classId ?? "N/A";
+    const localizedClassName = classNameMapForSpecies[languageCode] ?? classNameMapForSpecies['en'] ?? speciesData.classId ?? "";
 
     // Xử lý scientificClass cẩn thận hơn
-    let scientificClass = "N/A";
+    let scientificClass = "";
     if (speciesData.classId && typeof speciesData.classId === 'string' && speciesData.classId.length > 0) {
         scientificClass = speciesData.classId.charAt(0).toUpperCase() + speciesData.classId.slice(1).toLowerCase();
     }
@@ -138,15 +138,15 @@ const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageC
         localizedName,
         localizedClass: localizedClassName,
         scientific: {
-            name: speciesData.scientificName ?? "N/A",
+            name: speciesData.scientificName ?? "",
             family: scientificFamily,
             class: scientificClass, // scientificClass đã được xử lý
         },
         localizedFamily,
         thumbnailImageURL, // Có thể là null
-        imageURL: processedImageURLs.length > 0 ? processedImageURLs : null, // Trả về null nếu không có ảnh đã xử lý
-        info: speciesData.info ?? null, // Giả sử info có thể không tồn tại
-        conservation: speciesData.conservation ?? null, // Giả sử conservation có thể không tồn tại
+        imageURL: processedImageURLs, // Trả về null nếu không có ảnh đã xử lý
+        info: speciesData.info ?? "", // Giả sử info có thể không tồn tại
+        conservation: speciesData.conservation ?? "", // Giả sử conservation có thể không tồn tại
 
         // Các trường mô tả chi tiết, trả về null nếu không có bản dịch phù hợp
         localizedSummary,
