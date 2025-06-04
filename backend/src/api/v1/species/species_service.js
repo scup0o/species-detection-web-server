@@ -65,6 +65,16 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
     };
 };
 
+function ensureArray(value) {
+    if (Array.isArray(value)) {
+        return value; // Đã là mảng, giữ nguyên
+    }
+    if (value && typeof value === 'string' && value.trim() !== "") {
+        return [value]; // Là chuỗi không rỗng, tạo mảng với một phần tử là chuỗi đó
+    }
+    return []; // Là null, undefined, hoặc chuỗi rỗng, trả về mảng rỗng
+}
+
 const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageCode) => {
     // Luôn kiểm tra speciesRawData trước tiên
     if (!speciesRawData) {
@@ -110,11 +120,18 @@ const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageC
     }
 
     // Kiểm tra các trường text có thể là object theo ngôn ngữ
-    const localizedSummary = speciesData.summary?.[languageCode] ?? speciesData.summary?.['en'] ?? "";
-    const localizedPhysicalDescription = speciesData.physicalDescription?.[languageCode] ?? speciesData.physicalDescription?.['en'] ?? "";
-    const localizedHabitat = speciesData.habitat?.[languageCode] ?? speciesData.habitat?.['en'] ?? "";
-    const localizedDistribution = speciesData.distribution?.[languageCode] ?? speciesData.distribution?.['en'] ?? "";
-    const localizedBehavior = speciesData.behavior?.[languageCode] ?? speciesData.behavior?.['en'] ?? "";
+    const rawSummary = speciesData.summary?.[languageCode] ?? speciesData.summary?.['en'];
+    const rawPhysicalDescription = speciesData.physicalDescription?.[languageCode] ?? speciesData.physicalDescription?.['en'];
+    const rawHabitat = speciesData.habitat?.[languageCode] ?? speciesData.habitat?.['en'];
+    const rawDistribution = speciesData.distribution?.[languageCode] ?? speciesData.distribution?.['en']; // Sửa lỗi chính tả nếu cần
+    const rawBehavior = speciesData.behavior?.[languageCode] ?? speciesData.behavior?.['en'];
+
+    // Áp dụng hàm helper để đảm bảo kết quả là mảng
+    const localizedSummary = ensureArray(rawSummary);
+    const localizedPhysicalDescription = ensureArray(rawPhysicalDescription);
+    const localizedHabitat = ensureArray(rawHabitat);
+    const localizedDistribution = ensureArray(rawDistribution);
+    const localizedBehavior = ensureArray(rawBehavior);
 
     return {
         id: speciesId,
