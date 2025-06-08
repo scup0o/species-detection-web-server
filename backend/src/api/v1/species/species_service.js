@@ -84,8 +84,7 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode,uid)
         observationCheck = await getObservation(uid, speciesId);
         if (observationCheck!=null){
             haveObservation = true;
-            if (observationCheck!=undefined)
-                firstFound = observationCheck.data().dateFound
+                firstFound = observationCheck.dateFound
         }
     }
 
