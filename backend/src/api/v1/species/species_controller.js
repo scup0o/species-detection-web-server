@@ -13,10 +13,10 @@ const getAllSpecies = async (req, res, next) => {
 
 const getSpeciesByIds = async (req, res, next) => {
     try {
-        const { ids, languageCode, uid } = req.query; // Đã được validate
+        const { ids, languageCode } = req.query; // Đã được validate
         const idList = ids.split(','); // Validator đã đảm bảo ids là chuỗi hợp lệ
 
-        const result = await speciesService.getSpeciesByIdsList(idList, languageCode,uid);
+        const result = await speciesService.getSpeciesByIdsList(idList, languageCode);
         return pagedSuccess(res, result.items, result.pagination);
     } catch (err) {
         next(err);
