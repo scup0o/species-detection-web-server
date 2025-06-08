@@ -52,7 +52,7 @@ const getObservation = async (uid, speciesId) => {
   }
 };
 
-const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => {
+const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode,uid) => {
     const internalClassMap = await getSpeciesClassMapInternal();
     const speciesData = speciesRawData;
 
@@ -74,7 +74,7 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
     
     let thumbnailImageURL= getThumbnailImageURL(originalImageUrls[0])
 
-    /*let haveObservation = false;
+    let haveObservation = false;
     let firstFound = null
     console.log(uid)
     let observationCheck = {}
@@ -86,7 +86,7 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
             haveObservation = true;
                 firstFound = observationCheck.dateFound.toDate().toISOString()
         }
-    }*/
+    }
 
     return {
         id: speciesId,
@@ -100,8 +100,8 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
         localizedFamily,
         thumbnailImageURL,
         imageURL: processedImageURLs.length > 0 ? processedImageURLs : null,
-        //haveObservation,
-        //firstFound
+        haveObservation,
+        firstFound
     };
 };
 
@@ -210,7 +210,7 @@ const getSpeciesList = async (options) => {
         searchQuery: originalSearchQuery, 
         classId, 
         languageCode = 'en', 
-        lastVisibleDocId: clientLastVisibleDocId, page = 1} = options;
+        lastVisibleDocId: clientLastVisibleDocId, page = 1,uid } = options;
     const actualPageSize = parseInt(pageSize);
 
     let lastQuery = "";
@@ -321,7 +321,7 @@ const getSpeciesList = async (options) => {
 
     const itemsForCurrentPageData = accumulatedFilteredData.slice(0, actualPageSize);
     const displayableItems = await Promise.all(
-        itemsForCurrentPageData.map(item => toDisplayableSpecies(item.data, item.id, languageCode))
+        itemsForCurrentPageData.map(item => toDisplayableSpecies(item.data, item.id, languageCode, uid))
     );
 
     let newLastVisibleDocIdForClient = null;
@@ -373,7 +373,7 @@ const getSpeciesList = async (options) => {
     };
 };
 
-const getSpeciesByIdsList = async (idList, languageCode) => {
+const getSpeciesByIdsList = async (idList, languageCode, uid) => {
     if (!idList || idList.length === 0) return { items: [], pagination: { totalItems: 0, currentPage: 1, pageSize: 0, totalPages: 0, lastVisibleDocId: null, hasNextPage: false } };
     const fieldsToFetch = ["classId, family, imageURL, name, scientificName"];
 
@@ -382,7 +382,7 @@ const getSpeciesByIdsList = async (idList, languageCode) => {
     if (rawSpeciesList.length === 0) return { items: [], pagination: { totalItems: 0, currentPage: 1, pageSize: idList.length, totalPages: 0, lastVisibleDocId: null, hasNextPage: false } };
 
     const displayableItems = await Promise.all(
-        rawSpeciesList.map(sRaw => toDisplayableSpecies(sRaw, sRaw.id, languageCode)) // sRaw is {id, ...data}
+        rawSpeciesList.map(sRaw => toDisplayableSpecies(sRaw, sRaw.id, languageCode,uid)) // sRaw is {id, ...data}
     );
 
     return {
