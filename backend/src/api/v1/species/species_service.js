@@ -28,7 +28,31 @@ const getSpeciesClassMapInternal = async () => {
     }
 };
 
-const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => {
+const getObservation = async (uid, speciesId) => {
+  try {
+    
+    // Truy vấn các document có uid và speciesId phù hợp, và sắp xếp theo dateFound
+    const querySnapshot = await firestoreService.getCollection('observations')
+      .where('uid', '==', uid)
+      .where('speciesId', '==', speciesId)
+      .orderBy('dateFound', 'asc')  // Sắp xếp theo dateFound (ngày sớm nhất)
+      .limit(1).get()  // Lấy chỉ 1 document đầu tiên
+    
+    if (!querySnapshot.empty) {
+      // Lấy document đầu tiên
+      const observation = querySnapshot.docs[0].data();
+      console.log('Observation found:', observation);
+      return observation;
+    } else {
+      console.log('No observation found matching criteria.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error getting observation:', error);
+  }
+};
+
+const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode,uid) => {
     const internalClassMap = await getSpeciesClassMapInternal();
     const speciesData = speciesRawData;
 
@@ -50,6 +74,21 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
     
     let thumbnailImageURL= getThumbnailImageURL(originalImageUrls[0])
 
+    let haveObservation = false;
+    let firstFound = null
+    console.log(uid)
+    let observationCheck = {}
+
+    if (uid!=null && uid!=""){
+        
+        observationCheck = await getObservation(uid, speciesId);
+        if (observationCheck!=null){
+            haveObservation = true;
+            if (observationCheck[0]!=undefined)
+                firstFound = observationCheck[0].data().dateFound
+        }
+    }
+
     return {
         id: speciesId,
         localizedName,
@@ -62,6 +101,8 @@ const toDisplayableSpecies = async (speciesRawData, speciesId, languageCode) => 
         localizedFamily,
         thumbnailImageURL,
         imageURL: processedImageURLs.length > 0 ? processedImageURLs : null,
+        haveObservation,
+        firstFound
     };
 };
 
@@ -166,7 +207,11 @@ const toDisplayableSpeciesDetailed = async (speciesRawData, speciesId, languageC
 };
 
 const getSpeciesList = async (options) => {
-    const { pageSize = 5, searchQuery: originalSearchQuery, classId, languageCode = 'en', lastVisibleDocId: clientLastVisibleDocId, page = 1 } = options;
+    const { pageSize = 5, 
+        searchQuery: originalSearchQuery, 
+        classId, 
+        languageCode = 'en', 
+        lastVisibleDocId: clientLastVisibleDocId, page = 1,uid } = options;
     const actualPageSize = parseInt(pageSize);
 
     let lastQuery = "";
@@ -277,7 +322,7 @@ const getSpeciesList = async (options) => {
 
     const itemsForCurrentPageData = accumulatedFilteredData.slice(0, actualPageSize);
     const displayableItems = await Promise.all(
-        itemsForCurrentPageData.map(item => toDisplayableSpecies(item.data, item.id, languageCode))
+        itemsForCurrentPageData.map(item => toDisplayableSpecies(item.data, item.id, languageCode, uid))
     );
 
     let newLastVisibleDocIdForClient = null;
@@ -329,7 +374,7 @@ const getSpeciesList = async (options) => {
     };
 };
 
-const getSpeciesByIdsList = async (idList, languageCode) => {
+const getSpeciesByIdsList = async (idList, languageCode, uid) => {
     if (!idList || idList.length === 0) return { items: [], pagination: { totalItems: 0, currentPage: 1, pageSize: 0, totalPages: 0, lastVisibleDocId: null, hasNextPage: false } };
     const fieldsToFetch = ["classId, family, imageURL, name, scientificName"];
 
@@ -338,7 +383,7 @@ const getSpeciesByIdsList = async (idList, languageCode) => {
     if (rawSpeciesList.length === 0) return { items: [], pagination: { totalItems: 0, currentPage: 1, pageSize: idList.length, totalPages: 0, lastVisibleDocId: null, hasNextPage: false } };
 
     const displayableItems = await Promise.all(
-        rawSpeciesList.map(sRaw => toDisplayableSpecies(sRaw, sRaw.id, languageCode)) // sRaw is {id, ...data}
+        rawSpeciesList.map(sRaw => toDisplayableSpecies(sRaw, sRaw.id, languageCode,uid)) // sRaw is {id, ...data}
     );
 
     return {
